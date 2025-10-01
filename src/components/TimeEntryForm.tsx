@@ -27,8 +27,8 @@ const TimeEntryForm = ({
       user_id: 1,
       description: '',
       start_time: new Date().toISOString().slice(0, 16),
-      end_time: '',
-      duration: 0,
+      end_time: null,
+      duration: null,
       billable: true,
     },
   })
@@ -51,11 +51,10 @@ const TimeEntryForm = ({
 
   const onSubmit = async (data: TimeEntryFormData) => {
     try {
-      const duration = calculateDuration(data.start_time, data.end_time || '')
-
       const payload: Partial<TimeEntryFormData> & {
         start_time: string
-        end_time?: string
+        end_time?: string | null
+        duration?: number | null
       } = {
         project_id: data.project_id,
         user_id: data.user_id,
@@ -69,10 +68,13 @@ const TimeEntryForm = ({
 
       if (data.end_time && data.end_time.trim()) {
         payload.end_time = new Date(data.end_time).toISOString()
-      }
-
-      if (duration > 0) {
-        payload.duration = duration
+        const duration = calculateDuration(data.start_time, data.end_time)
+        if (duration > 0) {
+          payload.duration = duration
+        }
+      } else {
+        payload.end_time = null
+        payload.duration = null
       }
 
       await createTimeEntryMutation.mutateAsync(payload)
@@ -118,7 +120,11 @@ const TimeEntryForm = ({
               required
             />
 
-            <FormInput name="end_time" label="End Time" type="datetime-local" />
+            <FormInput
+              name="end_time"
+              label="End Time (optional)"
+              type="datetime-local"
+            />
           </div>
 
           <FormCheckbox name="billable" label="Billable" />

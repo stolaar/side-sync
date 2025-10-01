@@ -27,8 +27,8 @@ export const timeEntrySchema = z.object({
     .max(1000, 'Description must be less than 1000 characters')
     .optional(),
   start_time: z.string().min(1, 'Start time is required'),
-  end_time: z.string().optional(),
-  duration: z.number().min(0, 'Duration must be positive').optional(),
+  end_time: z.string().nullable().optional(),
+  duration: z.number().min(0, 'Duration must be positive').nullable().optional(),
   billable: z.boolean().default(true),
 })
 
